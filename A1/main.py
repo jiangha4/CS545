@@ -1,24 +1,36 @@
+__author__= "Haohan Jiang, 938737222"
 from utils import load_data, create_preceptron_layer, shuffle_data, append_bias
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 def compute(network, x_data):
-    percept_output = []
+    '''
+    Compute the y of the network
+    '''
+    percept_output_raw = []
+    percept_output_converted = []
     for percept in network:
         out = percept.compute_target(x_data)
+        percept_output_raw.append(out)
         if out > 0:
-            percept_output.append(1)
+            percept_output_converted.append(1)
         else:
-            percept_output.append(0)
-    return percept_output
+            percept_output_converted.append(0)
+    return percept_output_raw, percept_output_converted
 
 
 def update(network, t_values, percept_outputs, x_data):
+    '''
+    Update the weights
+    '''
     for i in range(0, len(network)):
         network[i].update_weights(t_values[i], percept_outputs[i], x_data)
 
 
 def calc_acc(predictions, labels):
+    '''
+    Calc accuracy
+    '''
     correct = 0
     numOfPredictions = len(predictions)
     for i in range(0, numOfPredictions):
@@ -29,19 +41,25 @@ def calc_acc(predictions, labels):
     return acc
 
 
-def generate_graph(acc):
-    fig, ax = plt.subplots()
-    ax.grid()
-    ax.plot(list(range(0,50)), acc)
-    ax.set(xlabel='Epochs', ylabel='Accuracy',
-           title='Accuracy per Epoch')
+def generate_graph(acc_train, acc_test):
+    numEpochs = list(range(0, 50))
+
+    plt.plot(numEpochs, acc_train, label='Training Accuracy')
+    plt.plot(numEpochs, acc_test, label='Testing Accuracy')
+
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+
+    plt.legend()
     plt.show()
 
-
 def generate_matrix(predictions, y_labels):
-    matrix = np.empty([10, 10])
+    print("Generating confusion matrix")
+    matrix = np.zeros([10, 10])
     for i in range(0, len(predictions)):
-        matrix[int(predictions)][int(y_labels)] += 1
+        matrix[int(predictions[i])][int(y_labels[i])] += 1
+
+    print(matrix)
 
 def main():
     # load training data
@@ -68,30 +86,32 @@ def main():
         # Create 10 Perceptrons with learning rate rate
         network = create_preceptron_layer(rate)
 
-        acc = []
+        acc_test_buf = []
+        acc_train_buf = []
         for j in range(0, epochs):
             print("Training Epoch: {}".format(j))
             # Training
             prediction_training = []
             for i in range(0, x_train.shape[0]):
-                out = compute(network, x_train[i])
-                prediction_training.append(out.index(max(out)))
+                train_out_raw, train_out_converted = compute(network, x_train[i])
+                prediction_training.append(train_out_raw.index(max(train_out_raw)))
                 t_values = [0] * 10
                 t_values[int(y_train[i])] = 1
-                update(network, t_values, out, x_train[i])
-            accuracy_training = calc_acc(prediction_training, y_train)
+                update(network, t_values, train_out_converted, x_train[i])
+            accuracy_training = calc_acc(prediction_training, y_train)*float(100)
 
             prediction_test = []
             # Testing
             for k in range(0, x_test.shape[0]):
-                percept_output = compute(network, x_test[k])
-                prediction_test.append(percept_output.index(max(percept_output)))
+                test_out_raw, test_out_converted = compute(network, x_test[k])
+                prediction_test.append(test_out_raw.index(max(test_out_raw)))
+            accuracy_test = calc_acc(prediction_test, y_test)*float(100)
 
-            accuracy = calc_acc(prediction_test, y_test)
-            acc.append(accuracy)
+            acc_train_buf.append(accuracy_training)
+            acc_test_buf.append(accuracy_test)
 
         # Create the graph
-        generate_graph(acc)
+        generate_graph(acc_train_buf, acc_test_buf)
 
         # Generate matrix
         generate_matrix(prediction_test, y_test)

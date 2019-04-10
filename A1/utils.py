@@ -1,5 +1,7 @@
+__author__= "Haohan Jiang, 938737222"
+
 import numpy as np
-from preceptron import Preceptron
+from preceptron import Perceptron
 
 
 def load_data(path):
@@ -22,7 +24,7 @@ def create_preceptron_layer(learning_rate):
     '''
     preceptron_layer = []
     for i in range(0, 10):
-        preceptron_layer.append(Preceptron(learning_rate))
+        preceptron_layer.append(Perceptron(learning_rate))
 
     return preceptron_layer
 
