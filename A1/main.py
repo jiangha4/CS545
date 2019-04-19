@@ -1,23 +1,15 @@
 __author__= "Haohan Jiang, 938737222"
-from utils import load_data, create_preceptron_layer, shuffle_data, append_bias
+from utils import *
 import numpy as np
 import matplotlib.pyplot as plt
+from preceptron import Perceptron
 
-def compute(network, x_data):
-    '''
-    Compute the y of the network
-    '''
-    percept_output_raw = []
-    percept_output_converted = []
-    for percept in network:
-        out = percept.compute_target(x_data)
-        percept_output_raw.append(out)
-        if out > 0:
-            percept_output_converted.append(1)
-        else:
-            percept_output_converted.append(0)
-    return percept_output_raw, percept_output_converted
 
+def compute(raw_output):
+    if raw_output > 0:
+        return 1
+    else:
+        return 0
 
 def update(network, t_values, percept_outputs, x_data):
     '''
@@ -40,7 +32,6 @@ def calc_acc(predictions, labels):
     print("Training Accuracy: {}".format(acc))
     return acc
 
-
 def generate_graph(acc_train, acc_test):
     numEpochs = list(range(0, 50))
 
@@ -49,6 +40,9 @@ def generate_graph(acc_train, acc_test):
 
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
+
+    axes = plt.gca()
+    axes.set_ylim([40, 100])
 
     plt.legend()
     plt.show()
@@ -61,30 +55,34 @@ def generate_matrix(predictions, y_labels):
 
     print(matrix)
 
+def dumby_data():
+    x_train = np.random.randint(0, 5, size=(10, 5))
+    x_test = np.random.randint(0, 5, size=(3, 5))
+
+    y_train = np.random.randint(0, 1, size=(10, 1))
+    y_test = np.random.randint(0, 1, size=(3, 1))
+
+    return x_train, y_train, x_test, y_test
+
 def main():
-    # load training data
-    data = load_data('../datasets/mnist_train.csv')
-    x_train, y_train = shuffle_data(data)
-
-    # load testing data
-    data = load_data('../datasets/mnist_test.csv')
-    x_test, y_test = shuffle_data(data)
-
-    # preprocessing
-    x_train /= 255
-    x_test /= 255
-
-    x_train = append_bias(x_train)
-    x_test = append_bias(x_test)
+    x_train, y_train, x_test, y_test = get_data()
+    #x_train, y_train, x_test, y_test = dumby_data()
 
     # epochs
     epochs = 50
 
+    #vectorized compute function
+    vc = np.vectorize(compute)
+
     learning_rates = [.001, .01, .1]
+
+    # number of training objects
+    training_length = x_train.shape[0]
+    test_length = x_test.shape[0]
     for rate in learning_rates:
         print("Creating 10 Perceptrons with learning rate: {}".format(rate))
         # Create 10 Perceptrons with learning rate rate
-        network = create_preceptron_layer(rate)
+        network = Perceptron(rate)
 
         acc_test_buf = []
         acc_train_buf = []
@@ -92,20 +90,29 @@ def main():
             print("Training Epoch: {}".format(j))
             # Training
             prediction_training = []
-            for i in range(0, x_train.shape[0]):
-                train_out_raw, train_out_converted = compute(network, x_train[i])
-                prediction_training.append(train_out_raw.index(max(train_out_raw)))
-                t_values = [0] * 10
+            for i in range(0, training_length):
+                x_2d = x_train[i][np.newaxis]
+
+                train_out_raw = network.compute_target(x_2d.T)
+
+                train_prediction = vc(train_out_raw)
+                prediction_training.append(train_out_raw.argmax())
+
+                t_values = np.zeros(10)
                 t_values[int(y_train[i])] = 1
-                update(network, t_values, train_out_converted, x_train[i])
+
+                network.update_weights(t_values, train_prediction, x_2d)
             accuracy_training = calc_acc(prediction_training, y_train)*float(100)
 
             prediction_test = []
             # Testing
-            for k in range(0, x_test.shape[0]):
-                test_out_raw, test_out_converted = compute(network, x_test[k])
-                prediction_test.append(test_out_raw.index(max(test_out_raw)))
-            accuracy_test = calc_acc(prediction_test, y_test)*float(100)
+            for k in range(0, test_length):
+                x_test_2d = x_test[k][np.newaxis]
+
+                test_out_raw = network.compute_target(x_test_2d.T)
+
+                prediction_test.append(test_out_raw.argmax())
+            accuracy_test = calc_acc(prediction_test, y_test)*100
 
             acc_train_buf.append(accuracy_training)
             acc_test_buf.append(accuracy_test)

@@ -1,7 +1,74 @@
 __author__= "Haohan Jiang, 938737222"
 
 import numpy as np
-from preceptron import Perceptron
+import os
+
+def pickled_data():
+    data_names = ['x_test', 'x_train', 'y_test', 'y_train']
+    exists = True
+    for name in data_names:
+        file_name = 'A2_' + name
+        path = os.path.dirname(os.path.abspath(__file__))
+        file_path = str(path) + '/statics/' + file_name + '.npy'
+
+        exists = exists & os.path.isfile(file_path)
+
+    return exists
+
+def save_data(x_test, x_train, y_test, y_train):
+    print("Saving data to pickles")
+    args = locals()
+    data_names = ['x_test', 'x_train', 'y_test', 'y_train']
+    for name in data_names:
+        file_name = 'A2_' + name
+        path = os.path.dirname(os.path.abspath(__file__))
+        file_path = str(path) + '/statics/' + file_name
+        np.save(file_path, args[name])
+
+def load_saved_data():
+    buf = {}
+    data_names = ['x_test', 'x_train', 'y_test', 'y_train']
+    for name in data_names:
+        file_name = 'A2_' + name
+        path = os.path.dirname(os.path.abspath(__file__))
+        file_path = str(path) + '/statics/' + file_name + '.npy'
+
+        buf[name] = np.load(file_path)
+    return buf
+
+def get_data():
+    if not pickled_data():
+        # load training data
+        print("Loading training data")
+        path = '../datasets/mnist_train.csv'
+        data = load_data(path)
+        x_train, y_train = shuffle_data(data)
+
+        # load testing data
+        print("Loading testing data")
+        path = '../datasets/mnist_test.csv'
+        data = load_data(path)
+        x_test, y_test = shuffle_data(data)
+
+        # preprocessing
+        x_train /= 255
+        x_test /= 255
+
+        # prepend bias
+        print("Appending bias")
+        x_train = append_bias(x_train)
+        x_test = append_bias(x_test)
+
+        save_data(x_test, x_train, y_test, y_train)
+    else:
+        print("Found pickled data")
+        buf = load_saved_data()
+        x_train = buf['x_train']
+        x_test = buf['x_test']
+        y_train = buf['y_train']
+        y_test = buf['y_test']
+
+    return x_train, y_train, x_test, y_test
 
 
 def load_data(path):
@@ -14,20 +81,6 @@ def load_data(path):
     with open(path, 'r', newline='') as csvfile:
         data = np.loadtxt(csvfile, delimiter=',')
     return data
-
-
-def create_preceptron_layer(learning_rate):
-    '''
-    Creates an array of 10 preceptrons with a given learning rate
-    :param learning_rate: Learning rate of the preceptron
-    :return: array of Preceptron objects
-    '''
-    preceptron_layer = []
-    for i in range(0, 10):
-        preceptron_layer.append(Perceptron(learning_rate))
-
-    return preceptron_layer
-
 
 def shuffle_data(data):
     '''
