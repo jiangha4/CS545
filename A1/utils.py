@@ -1,4 +1,4 @@
-__author__= "Haohan Jiang, 938737222"
+__author__= "Haohan Jiang, 938737222 jiang4"
 
 import numpy as np
 import os
@@ -40,13 +40,13 @@ def get_data():
     if not pickled_data():
         # load training data
         print("Loading training data")
-        path = '../datasets/mnist_train.csv'
+        path = 'datasets/mnist_train.csv'
         data = load_data(path)
         x_train, y_train = shuffle_data(data)
 
         # load testing data
         print("Loading testing data")
-        path = '../datasets/mnist_test.csv'
+        path = 'datasets/mnist_test.csv'
         data = load_data(path)
         x_test, y_test = shuffle_data(data)
 

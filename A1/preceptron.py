@@ -1,4 +1,4 @@
-__author__= "Haohan Jiang, 938737222"
+__author__= "Haohan Jiang, 938737222 jiang4"
 
 import numpy as np
 
@@ -6,9 +6,8 @@ class Perceptron(object):
     def __init__(self, learning_rate):
         # 784 weights for input layer
         # 1 weight for bias
-        self.weights = np.random.uniform(-0.05, 0.06, size=(10, 785))
+        self.weights = np.random.uniform(-0.05, 0.05, size=(10, 785))
         self.learning_rate = float(learning_rate)
-        self.len = 785
 
     def compute_target(self, x_data):
         return np.dot(self.weights, x_data)

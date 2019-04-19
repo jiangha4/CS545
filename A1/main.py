@@ -1,4 +1,4 @@
-__author__= "Haohan Jiang, 938737222"
+__author__= "Haohan Jiang, 938737222 jiang4"
 from utils import *
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,14 +11,6 @@ def compute(raw_output):
     else:
         return 0
 
-def update(network, t_values, percept_outputs, x_data):
-    '''
-    Update the weights
-    '''
-    for i in range(0, len(network)):
-        network[i].update_weights(t_values[i], percept_outputs[i], x_data)
-
-
 def calc_acc(predictions, labels):
     '''
     Calc accuracy
@@ -29,7 +21,6 @@ def calc_acc(predictions, labels):
         if int(predictions[i]) == int(labels[i]):
             correct += 1
     acc = float(correct/numOfPredictions)
-    print("Training Accuracy: {}".format(acc))
     return acc
 
 def generate_graph(acc_train, acc_test):
@@ -42,7 +33,7 @@ def generate_graph(acc_train, acc_test):
     plt.ylabel('Accuracy')
 
     axes = plt.gca()
-    axes.set_ylim([40, 100])
+    axes.set_ylim([60, 100])
 
     plt.legend()
     plt.show()
@@ -51,7 +42,7 @@ def generate_matrix(predictions, y_labels):
     print("Generating confusion matrix")
     matrix = np.zeros([10, 10])
     for i in range(0, len(predictions)):
-        matrix[int(predictions[i])][int(y_labels[i])] += 1
+        matrix[int(y_labels[i])][int(predictions[i])] += 1
 
     print(matrix)
 
@@ -65,6 +56,7 @@ def dumby_data():
     return x_train, y_train, x_test, y_test
 
 def main():
+    # get the data
     x_train, y_train, x_test, y_test = get_data()
     #x_train, y_train, x_test, y_test = dumby_data()
 
@@ -95,14 +87,17 @@ def main():
 
                 train_out_raw = network.compute_target(x_2d.T)
 
+                # convert output into training predictions
                 train_prediction = vc(train_out_raw)
                 prediction_training.append(train_out_raw.argmax())
 
+                # create vector of T values
                 t_values = np.zeros(10)
                 t_values[int(y_train[i])] = 1
 
                 network.update_weights(t_values, train_prediction, x_2d)
             accuracy_training = calc_acc(prediction_training, y_train)*float(100)
+            print("Training Accuracy: {}".format(accuracy_training))
 
             prediction_test = []
             # Testing
@@ -111,8 +106,10 @@ def main():
 
                 test_out_raw = network.compute_target(x_test_2d.T)
 
+                # get the index of the max value from network output
                 prediction_test.append(test_out_raw.argmax())
             accuracy_test = calc_acc(prediction_test, y_test)*100
+            print("Testing Accuracy: {}".format(accuracy_test))
 
             acc_train_buf.append(accuracy_training)
             acc_test_buf.append(accuracy_test)
