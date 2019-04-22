@@ -14,7 +14,7 @@ def generate_graph(acc_train, acc_test):
     plt.ylabel('Accuracy')
 
     axes = plt.gca()
-    axes.set_ylim([60, 100])
+    axes.set_ylim([30, 100])
 
     plt.legend()
     plt.show()

@@ -10,14 +10,14 @@ def get_data():
         # load training data
         print("Loading training data")
         path = os.path.dirname(os.path.abspath(__file__)) + '/datasets/mnist_train.csv'
-        data = load_data(path)
-        x_train, y_train = shuffle_data(data)
+        train_data = load_data(path)
+        x_train, y_train = shuffle_data(train_data)
 
         # load testing data
         print("Loading testing data")
         path = os.path.dirname(os.path.abspath(__file__)) + '/datasets/mnist_test.csv'
-        data = load_data(path)
-        x_test, y_test = shuffle_data(data)
+        test_data = load_data(path)
+        x_test, y_test = shuffle_data(test_data)
 
         # preprocessing
         x_train /= 255
@@ -27,10 +27,23 @@ def get_data():
         print("Appending bias")
         x_train = append_bias(x_train)
         x_test = append_bias(x_test)
+
+        save_data(train_data, test_data)
     else:
         buf = load_saved_data()
         train_data = buf['train']
         test_data = buf['test']
+
+        x_train, y_train = shuffle_data(train_data)
+        x_test, y_test = shuffle_data(test_data)
+
+        # preprocessing
+        x_train /= 255
+        x_test /= 255
+
+        # prepend bias
+        x_train = append_bias(x_train)
+        x_test = append_bias(x_test)
 
     return x_train, y_train, x_test, y_test
 
@@ -63,23 +76,24 @@ def main():
     # number of hidden units
     hidden_units = [20, 50, 100]
 
-    training_length = 60000
-    test_length = 10000
+    training_length = x_train.shape[0]
+    test_length = x_test.shape[0]
     for num in hidden_units:
-        neural_net = network(num)
+        neural_net = network(num, 0.9)
 
         acc_test_buf = []
         acc_train_buf = []
         for i in range(0, epochs):
-            #training_data, testing_data = data()
-            #x_train, y_train = shuffle_data(training_data)
-            #x_test, y_test = shuffle_data(testing_data)
+            training_data, testing_data = data()
+            x_train, y_train = shuffle_data(training_data)
+            x_test, y_test = shuffle_data(testing_data)
 
-            #x_train /= 255
-            #x_test /= 255
+            print(x_train.shape)
+            x_train /= 255
+            x_test /= 255
 
-            #x_train = append_bias(x_train)
-            #x_test = append_bias(x_test)
+            x_train = append_bias(x_train)
+            x_test = append_bias(x_test)
 
             print("Training Epoch: {}".format(i))
             prediction_training = []
@@ -129,6 +143,7 @@ def main():
                  # forward propagate
                 # hidden layer
                 hidden_layer_output = neural_net.compute_hidden_layer(x_test_2d.T)
+                #print("hidden layer: {}".format(hidden_layer_output))
                 # apply activation
                 output_layer_inputs = neural_net.sigmoid(hidden_layer_output.T)
 
