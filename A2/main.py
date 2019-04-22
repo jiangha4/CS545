@@ -4,6 +4,7 @@ from utils import *
 import numpy as np
 from network import network
 
+
 def get_data():
     if not pickled_data():
         # load training data
@@ -26,15 +27,10 @@ def get_data():
         print("Appending bias")
         x_train = append_bias(x_train)
         x_test = append_bias(x_test)
-
-        save_data(x_test, x_train, y_test, y_train)
     else:
-        print("Found pickled data")
         buf = load_saved_data()
-        x_train = buf['x_train']
-        x_test = buf['x_test']
-        y_train = buf['y_train']
-        y_test = buf['y_test']
+        train_data = buf['train']
+        test_data = buf['test']
 
     return x_train, y_train, x_test, y_test
 
@@ -58,7 +54,7 @@ def data():
     return train_data, test_data
 
 def main():
-    #x_train, y_train, x_test, y_test = get_data()
+    x_train, y_train, x_test, y_test = get_data()
     #x_train, y_train, x_test, y_test = dumby_data()
 
     # epochs
@@ -75,15 +71,15 @@ def main():
         acc_test_buf = []
         acc_train_buf = []
         for i in range(0, epochs):
-            training_data, testing_data = data()
-            x_train, y_train = shuffle_data(training_data)
-            x_test, y_test = shuffle_data(testing_data)
+            #training_data, testing_data = data()
+            #x_train, y_train = shuffle_data(training_data)
+            #x_test, y_test = shuffle_data(testing_data)
 
-            x_train /= 255
-            x_test /= 255
+            #x_train /= 255
+            #x_test /= 255
 
-            x_train = append_bias(x_train)
-            x_test = append_bias(x_test)
+            #x_train = append_bias(x_train)
+            #x_test = append_bias(x_test)
 
             print("Training Epoch: {}".format(i))
             prediction_training = []
