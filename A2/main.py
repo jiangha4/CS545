@@ -28,7 +28,7 @@ def get_data():
         x_train = append_bias(x_train)
         x_test = append_bias(x_test)
 
-        save_data(train_data, test_data)
+        save_data(test_data, train_data)
     else:
         buf = load_saved_data()
         train_data = buf['train']
@@ -76,24 +76,26 @@ def main():
     # number of hidden units
     hidden_units = [20, 50, 100]
 
+    print(x_train.shape)
+
     training_length = x_train.shape[0]
     test_length = x_test.shape[0]
     for num in hidden_units:
-        neural_net = network(num, 0.9)
+        neural_net = network(100, 1)
 
         acc_test_buf = []
         acc_train_buf = []
         for i in range(0, epochs):
-            training_data, testing_data = data()
-            x_train, y_train = shuffle_data(training_data)
-            x_test, y_test = shuffle_data(testing_data)
+            #training_data, testing_data = data()
+            #x_train, y_train = shuffle_data(training_data)
+            #x_test, y_test = shuffle_data(testing_data)
 
-            print(x_train.shape)
-            x_train /= 255
-            x_test /= 255
+            #print(x_train.shape)
+            #x_train /= 255
+            #x_test /= 255
 
-            x_train = append_bias(x_train)
-            x_test = append_bias(x_test)
+            #x_train = append_bias(x_train)
+            #x_test = append_bias(x_test)
 
             print("Training Epoch: {}".format(i))
             prediction_training = []
@@ -121,7 +123,7 @@ def main():
                 sigma_k = neural_net.output_error(t_values, train_out_raw.flatten())
                 #print("Output error: {}".format(sigma_k))
                 output_unit_error_2d = sigma_k[np.newaxis]
-                sigma_j = neural_net.hidden_unit_error(output_layer_inputs, output_unit_error_2d.T)
+                sigma_j = neural_net.hidden_unit_error(output_layer_inputs, sigma_k)
                 #print("hidden unit error: {}".format(sigma_j))
                 #print(sigma_j.shape)
 

@@ -47,14 +47,14 @@ class network(object):
 
         #print(weights.shape)
         #print(output_error.shape)
-        term3 = np.sum(weights*output_error, axis=1)
+        term3 = np.dot(output_error, weights)
 
         #print("term3: {}".format(term3))
         #print("hidden values: {}".format(hidden_values.shape))
         #print("output error: {}".format(output_error))
         term2 = float(1) - hidden_values
         #print(term3.shape)
-        return np.sum(hidden_values*term2*(term3[np.newaxis].T), axis=0)
+        return hidden_values*term2*term3
 
     def update_hidden_output_weights(self, error, hidden_layer_output):
         #print("Update hidden layer to output layer")
