@@ -68,7 +68,6 @@ def data():
 
 def main():
     x_train, y_train, x_test, y_test = get_data()
-    #x_train, y_train, x_test, y_test = dumby_data()
 
     # epochs
     epochs = 50
@@ -76,27 +75,14 @@ def main():
     # number of hidden units
     hidden_units = [20, 50, 100]
 
-    print(x_train.shape)
-
     training_length = x_train.shape[0]
     test_length = x_test.shape[0]
     for num in hidden_units:
-        neural_net = network(100, 1)
+        neural_net = network(num, .9)
 
         acc_test_buf = []
         acc_train_buf = []
         for i in range(0, epochs):
-            #training_data, testing_data = data()
-            #x_train, y_train = shuffle_data(training_data)
-            #x_test, y_test = shuffle_data(testing_data)
-
-            #print(x_train.shape)
-            #x_train /= 255
-            #x_test /= 255
-
-            #x_train = append_bias(x_train)
-            #x_test = append_bias(x_test)
-
             print("Training Epoch: {}".format(i))
             prediction_training = []
             for j in range(0, training_length):
@@ -121,19 +107,12 @@ def main():
 
                 # error terms
                 sigma_k = neural_net.output_error(t_values, train_out_raw.flatten())
-                #print("Output error: {}".format(sigma_k))
                 output_unit_error_2d = sigma_k[np.newaxis]
                 sigma_j = neural_net.hidden_unit_error(output_layer_inputs, sigma_k)
-                #print("hidden unit error: {}".format(sigma_j))
-                #print(sigma_j.shape)
 
                 # update weights
-                #print("pre: {}".format(neural_net.hidden_to_output_weights))
                 neural_net.update_hidden_output_weights(output_unit_error_2d.T, out_inputs)
-                #print("post: {}".format(neural_net.hidden_to_output_weights))
-                #print("pre: {}".format(neural_net.input_to_hidden_weights))
                 neural_net.update_input_hidden_weights(sigma_j, x_2d.T)
-                #print("post: {}".format(neural_net.input_to_hidden_weights))
 
             accuracy_training = calc_acc(prediction_training, y_train)*float(100)
             print("Training Accuracy: {}".format(accuracy_training))
@@ -145,7 +124,6 @@ def main():
                  # forward propagate
                 # hidden layer
                 hidden_layer_output = neural_net.compute_hidden_layer(x_test_2d.T)
-                #print("hidden layer: {}".format(hidden_layer_output))
                 # apply activation
                 output_layer_inputs = neural_net.sigmoid(hidden_layer_output.T)
 
